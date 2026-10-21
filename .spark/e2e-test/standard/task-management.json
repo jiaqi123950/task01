@@ -1,0 +1,1 @@
+{"cases":[{"id":1,"priority":"p0","description":"打开首页，看到「智能任务管理」标题和输入框、优先级下拉、添加按钮"},{"id":2,"priority":"p0","description":"在输入框输入任务标题并选择高优先级，点击添加后任务列表中出现该任务且带红色「高」标签"},{"id":3,"priority":"p0","description":"点击任务的圆形切换按钮，任务标题变为删除线且切换按钮变为绿色勾选"},{"id":4,"priority":"p0","description":"点击「高」筛选按钮，列表只显示高优先级任务"},{"id":5,"priority":"p0","description":"点击任务的删除按钮，该任务从列表中消失"}]}
