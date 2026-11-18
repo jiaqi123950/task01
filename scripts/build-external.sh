@@ -1,44 +1,24 @@
 #!/usr/bin/env bash
-# 外部环境构建脚本（Vercel / 自有服务器等）
-# 不依赖妙搭平台内部工具
+# Vercel 静态站点构建脚本
+# 不依赖妙搭平台内部工具，产出纯静态前端站点
 set -euo pipefail
 
 ROOT_DIR="$(pwd)"
-DIST_DIR="$ROOT_DIR/dist"
+OUT_DIR="$ROOT_DIR/dist-static"
 
-echo "=== 构建开始 ==="
+echo "📦 构建 Vercel 静态站点..."
 
-# 清理 dist
-rm -rf "$DIST_DIR"
+rm -rf "$OUT_DIR"
 
-# 构建 server
-echo "→ 构建服务端 (NestJS)..."
-NODE_OPTIONS="--max-old-space-size=8192" npm run build:server
+VITE_STATIC_MODE=true npx vite build \
+  --config vite.config.ts \
+  --mode production
 
-# 构建 client
-echo "→ 构建客户端 (Vite)..."
-NODE_OPTIONS="--max-old-space-size=8192" npm run build:client
-
-# 准备产物结构
-echo "→ 准备构建产物..."
-
-# 将 client 的 HTML 移到 dist/dist/client，保证视图路径正确
-if [ -d "$DIST_DIR/client" ]; then
-  mkdir -p "$DIST_DIR/dist/client"
-  # 复制 public 资源
-  if [ -d "$ROOT_DIR/client/public" ]; then
-    cp -R "$ROOT_DIR/client/public/." "$DIST_DIR/dist/client/"
-  fi
-  # 移动 HTML 入口文件
-  find "$DIST_DIR/client" -maxdepth 1 -name "*.html" -exec mv {} "$DIST_DIR/dist/client/" \;
+# 将 index.html 提升到输出目录顶层，确保 Vercel 的 outputDirectory 能识别首页
+if [ -f "$OUT_DIR/client/index.html" ]; then
+  mv "$OUT_DIR/client/index.html" "$OUT_DIR/index.html"
+  rmdir "$OUT_DIR/client" 2>/dev/null || true
 fi
 
-# 拷贝 .env（如果存在）
-if [ -f "$ROOT_DIR/.env" ]; then
-  cp "$ROOT_DIR/.env" "$DIST_DIR/"
-fi
-
-echo ""
-echo "=== 构建完成 ==="
-echo "产物目录: $DIST_DIR"
-du -sh "$DIST_DIR"
+echo "✅ 构建完成，产物在 $OUT_DIR"
+ls -la "$OUT_DIR"
